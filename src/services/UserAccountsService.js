@@ -21,6 +21,19 @@ const addUserAccount = (userAccount) => {
   fs.writeFileSync(userAccountsFile, JSON.stringify(userAccounts));
 };
 
+const getUserAccount = (email) => {
+  let userAccounts = [];
+  if (
+    fs.existsSync(userAccountsFile) &&
+    fs.statSync(userAccountsFile).size > 0
+  ) {
+    userAccounts = JSON.parse(fs.readFileSync(userAccountsFile));
+  }
+
+  return userAccounts.find((user) => user.email === email);
+};
+
 module.exports = {
   addUserAccount,
+  getUserAccount,
 };

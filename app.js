@@ -1,9 +1,10 @@
+require("dotenv").config();
 const express = require("express");
 const bodyParser = require("body-parser");
 const app = express();
-
+const passport = require("./src/configs/PassportConfig");
 // Load environment variables from .env file
-require("dotenv").config();
+
 const port = process.env.PORT || 3000;
 
 //Load routes
@@ -27,6 +28,9 @@ app.use((err, req, res, next) => {
 
   return;
 });
+
+// Initialize passport
+app.use(passport.initialize());
 
 app.listen(port, "0.0.0.0", () => {
   console.log(`Example app listening at http://localhost:${port}`);

@@ -1,8 +1,22 @@
 const express = require("express");
 const router = express.Router();
-
+const passport = require("passport");
 const userAccountController = require("../controllers/UserAccountsController");
 
 router.post("/signup", userAccountController.addUserAccount);
+
+router.post(
+  "/signin/password",
+  passport.authenticate("local", { session: false }),
+  userAccountController.signInUser
+);
+
+router.get(
+  "/tokenValid",
+  passport.authenticate("jwt", { session: false }),
+  (req, res) => {
+    res.status(200).send("Token is valid, and your request is Authorized.");
+  }
+);
 
 module.exports = router;
