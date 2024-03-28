@@ -7,6 +7,7 @@ require("dotenv").config();
 const port = process.env.PORT || 3000;
 
 //Load routes
+const usersRoutes = require("./src/routes/users");
 
 app.use(bodyParser.json());
 app.use(
@@ -15,7 +16,8 @@ app.use(
   })
 );
 
-// Attach routes to the app
+// Attaching routes to the app
+app.use("/users", usersRoutes);
 
 /* Error handler middleware */
 app.use((err, req, res, next) => {

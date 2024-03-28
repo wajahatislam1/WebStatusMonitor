@@ -11,6 +11,9 @@ coverage
 # Benchmarking
 benchmarks/graphs
 
+# data
+data
+
 
 # Environment
 .env
