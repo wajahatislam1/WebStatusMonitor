@@ -12,6 +12,17 @@ router.post(
 );
 
 router.get(
+  "/signin/google",
+  passport.authenticate("google", { session: false })
+);
+
+router.get(
+  "/signin/google/callback",
+  passport.authenticate("google", { session: false }),
+  userAccountController.signInUser
+);
+
+router.get(
   "/tokenValid",
   passport.authenticate("jwt", { session: false }),
   (req, res) => {

@@ -1,9 +1,12 @@
+// Load environment variables from .env file
 require("dotenv").config();
+
 const express = require("express");
 const bodyParser = require("body-parser");
 const app = express();
 const passport = require("./src/configs/PassportConfig");
-// Load environment variables from .env file
+const session = require("express-session");
+const FileStore = require("session-file-store")(session);
 
 const port = process.env.PORT || 3000;
 
@@ -14,6 +17,17 @@ app.use(bodyParser.json());
 app.use(
   bodyParser.urlencoded({
     extended: true,
+  })
+);
+
+// Session middleware
+app.use(
+  session({
+    store: new FileStore({ path: "./data/sessions" }),
+    secret: process.env.SESSION_SECRET,
+    resave: false,
+    saveUninitialized: true,
+    cookie: { secure: false },
   })
 );
 

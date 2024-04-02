@@ -16,6 +16,7 @@ const addUserAccount = async (req, res) => {
     email: req.body.email,
     password: hashedPassword,
     salt: salt.toString("hex"),
+    source: "local",
   };
 
   // Calling the service to add the user account
