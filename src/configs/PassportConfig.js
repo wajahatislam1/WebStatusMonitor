@@ -6,6 +6,8 @@ const userAccountService = require("../services/UserAccountsService");
 const passwordUtils = require("../utils/passwordUtils");
 const crypto = require("crypto");
 
+const envConfig = require("./envConfig");
+
 //Local strategy to authenticate the user signing in
 passport.use(
   new LocalStrategy(
@@ -50,7 +52,7 @@ passport.use(
   new JWTStrategy(
     {
       jwtFromRequest: ExtractJWT.fromAuthHeaderAsBearerToken(),
-      secretOrKey: process.env.JWT_SECRET_KEY,
+      secretOrKey: envConfig.JWT_SECRET_KEY,
     },
     (jwtPayload, done) => {
       if (jwtPayload.exp > Date.now() / 1000) {
@@ -66,9 +68,9 @@ passport.use(
 passport.use(
   new GoogleStrategy(
     {
-      clientID: process.env.GOOGLE_CLIENT_ID,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-      callbackURL: process.env.GOOGLE_CALLBACK_URL,
+      clientID: envConfig.GOOGLE_CLIENT_ID,
+      clientSecret: envConfig.GOOGLE_CLIENT_SECRET,
+      callbackURL: envConfig.GOOGLE_CALLBACK_URL,
       scope: ["email", "profile"],
     },
     async (accessToken, profile, done) => {

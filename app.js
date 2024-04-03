@@ -8,7 +8,7 @@ const passport = require("./src/configs/PassportConfig");
 const session = require("express-session");
 const FileStore = require("session-file-store")(session);
 
-const port = process.env.PORT || 3000;
+const { PORT } = require("./src/configs/envConfig");
 
 //Load routes
 const usersRoutes = require("./src/routes/users");
@@ -46,6 +46,6 @@ app.use((err, req, res, next) => {
 // Initialize passport
 app.use(passport.initialize());
 
-app.listen(port, "0.0.0.0", () => {
-  console.log(`Example app listening at http://localhost:${port}`);
+app.listen(PORT, "0.0.0.0", () => {
+  console.log(`Example app listening at http://localhost:${PORT}`);
 });
