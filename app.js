@@ -4,11 +4,11 @@ require("dotenv").config();
 const express = require("express");
 const bodyParser = require("body-parser");
 const app = express();
-const passport = require("./src/configs/PassportConfig");
+const passport = require("./src/configs/passport.config");
 const session = require("express-session");
 const FileStore = require("session-file-store")(session);
 
-const { PORT } = require("./src/configs/envConfig");
+const { PORT } = require("./src/configs/env.config");
 
 //Load routes
 const routes = require("./src/routes/index");

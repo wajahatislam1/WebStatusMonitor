@@ -4,7 +4,7 @@ let userAccountsFile = path.join(
   __dirname,
   "../../data/users/userAccounts.json"
 );
-let { readJsonFile } = require("../utils/fileUtils");
+let { readJsonFile } = require("../../utils/file.utils");
 
 const addUserAccount = async (userAccount) => {
   let userAccounts = await readJsonFile(userAccountsFile);

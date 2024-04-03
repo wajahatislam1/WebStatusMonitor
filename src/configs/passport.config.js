@@ -2,11 +2,11 @@ const passport = require("passport");
 const LocalStrategy = require("passport-local").Strategy;
 const GoogleStrategy = require("passport-google-oidc");
 
-const userAccountService = require("../services/UserAccountsService");
-const passwordUtils = require("../utils/passwordUtils");
+const userAccountService = require("../services/user/user.service");
+const passwordUtils = require("../utils/password.utils");
 const crypto = require("crypto");
 
-const envConfig = require("./envConfig");
+const envConfig = require("./env.config");
 
 //Local strategy to authenticate the user signing in
 passport.use(

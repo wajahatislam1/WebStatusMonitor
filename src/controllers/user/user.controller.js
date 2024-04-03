@@ -1,9 +1,9 @@
-const userAccountService = require("../services/UserAccountsService");
-const passwordUtils = require("../utils/passwordUtils");
+const userAccountService = require("../../services/user/user.service");
+const passwordUtils = require("../../utils/password.utils");
 const crypto = require("crypto");
 const jwt = require("jsonwebtoken");
 const { validationResult } = require("express-validator");
-const { JWT_SECRET_KEY } = require("../configs/envConfig");
+const { JWT_SECRET_KEY } = require("../../configs/env.config");
 
 const addUserAccount = async (req, res) => {
   //validating the request body
