@@ -11,7 +11,7 @@ const FileStore = require("session-file-store")(session);
 const { PORT } = require("./src/configs/envConfig");
 
 //Load routes
-const usersRoutes = require("./src/routes/users");
+const routes = require("./src/routes/index");
 
 app.use(bodyParser.json());
 app.use(
@@ -32,7 +32,7 @@ app.use(
 );
 
 // Attaching routes to the app
-app.use("/users", usersRoutes);
+app.use("/api/v1/", routes);
 
 /* Error handler middleware */
 app.use((err, req, res, next) => {
