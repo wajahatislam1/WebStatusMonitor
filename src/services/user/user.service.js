@@ -2,7 +2,7 @@ let fs = require("fs").promises;
 let path = require("path");
 let userAccountsFile = path.join(
   __dirname,
-  "../../data/users/userAccounts.json"
+  "../../../data/users/userAccounts.json"
 );
 let { readJsonFile } = require("../../utils/file.utils");
 

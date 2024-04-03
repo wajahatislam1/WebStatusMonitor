@@ -78,9 +78,9 @@ passport.use(
         email: profile.emails[0].value,
         source: "google",
       };
-
-      if (!userAccountService.getUserAccount(user.email)) {
-        userAccountService.addUserAccount(user);
+      existingUser = await userAccountService.getUserAccount(user.email);
+      if (!existingUser) {
+        await userAccountService.addUserAccount(user);
       }
 
       return done(null, user);
