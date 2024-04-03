@@ -2,11 +2,16 @@ const express = require("express");
 const router = express.Router();
 const passport = require("passport");
 const userAccountController = require("../controllers/UserAccountsController");
-
-router.post("/signup", userAccountController.addUserAccount);
+const userValidator = require("../validators/userValidator");
 
 router.post(
-  "/signin/password",
+  "/signup",
+  userValidator.signupValidators,
+  userAccountController.addUserAccount
+);
+
+router.post(
+  "/signin/local",
   passport.authenticate("local", { session: false }),
   userAccountController.signInUser
 );

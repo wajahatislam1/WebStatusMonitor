@@ -2,8 +2,15 @@ const userAccountService = require("../services/UserAccountsService");
 const passwordUtils = require("../utils/passwordUtils");
 const crypto = require("crypto");
 const jwt = require("jsonwebtoken");
+const { validationResult } = require("express-validator");
 
 const addUserAccount = async (req, res) => {
+  //validating the request body
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ errors: errors.array() });
+  }
+
   const salt = crypto.randomBytes(16);
   // Hashing the password
   const hashedPassword = await passwordUtils.hashPassword(
