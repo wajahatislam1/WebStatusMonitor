@@ -9,6 +9,15 @@ const signupValidators = [
     ),
 ];
 
+const updatePasswordValidator = [
+  body("password")
+    .optional()
+    .isStrongPassword()
+    .withMessage(
+      "Password must be at least 8 characters long, and contain at least one lowercase letter, one uppercase letter, one number, and one special character."
+    ),
+];
 module.exports = {
   signupValidators,
+  updatePasswordValidator,
 };

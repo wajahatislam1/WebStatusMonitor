@@ -22,17 +22,12 @@ passport.use(
       }
 
       if (user.source !== "local") {
-        return done(null, false, {
-          message: "User can't sign in using password.",
-        });
+        return done(null, false, { message: "User can't sign in using password." });
       }
 
       const storedPassword = Buffer.from(user.password, "hex");
       const hashedPassword = Buffer.from(
-        await passwordUtils.hashPassword(
-          password,
-          Buffer.from(user.salt, "hex")
-        ),
+        await passwordUtils.hashPassword(password, Buffer.from(user.salt, "hex")),
         "hex"
       );
 
@@ -53,9 +48,13 @@ passport.use(
     {
       jwtFromRequest: ExtractJWT.fromAuthHeaderAsBearerToken(),
       secretOrKey: envConfig.JWT_SECRET_KEY,
+      passReqToCallback: true,
     },
-    (jwtPayload, done) => {
-      if (jwtPayload.exp > Date.now() / 1000) {
+    async (req, jwtPayload, done) => {
+      const requestToken = req.headers.authorization.split(" ")[1];
+      const isTokenStored = await userAccountService.hasToken(jwtPayload.user.email, requestToken);
+
+      if (jwtPayload.exp > Date.now() / 1000 && isTokenStored) {
         return done(null, jwtPayload.user);
       } else {
         return done(null, false);

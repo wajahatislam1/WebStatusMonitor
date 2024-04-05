@@ -4,11 +4,7 @@ const passport = require("passport");
 const userAccountController = require("../../controllers/user/user.controller");
 const userValidator = require("../../validators/user/user.validator");
 
-router.post(
-  "/signup",
-  userValidator.signupValidators,
-  userAccountController.addUserAccount
-);
+router.post("/signup", userValidator.signupValidators, userAccountController.addUserAccount);
 
 router.post(
   "/signin/local",
@@ -16,10 +12,7 @@ router.post(
   userAccountController.signInUser
 );
 
-router.get(
-  "/signin/google",
-  passport.authenticate("google", { session: false })
-);
+router.get("/signin/google", passport.authenticate("google", { session: false }));
 
 router.get(
   "/signin/google/callback",
@@ -28,11 +21,19 @@ router.get(
 );
 
 router.get(
-  "/tokenValid",
+  "/signout",
   passport.authenticate("jwt", { session: false }),
-  (req, res) => {
-    res.status(200).send("Token is valid, and your request is Authorized.");
-  }
+  userAccountController.signOutUser
 );
+
+router.post(
+  "/update",
+  [passport.authenticate("jwt", { session: false }), userValidator.updatePasswordValidator],
+  userAccountController.updateUserAccount
+);
+
+router.get("/tokenValid", passport.authenticate("jwt", { session: false }), (req, res) => {
+  res.status(200).send("Token is valid, and your request is Authorized.");
+});
 
 module.exports = router;
