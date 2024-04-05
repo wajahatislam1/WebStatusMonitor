@@ -66,7 +66,12 @@ const updateUserAccount = async (req, res) => {
     return res.status(400).json({ errors: errors.array() });
   }
 
+  const email = req.params.email;
   const user = req.user;
+  if (email !== user.email) {
+    return res.status(401).send("Unauthorized");
+  }
+
   let accountInfo = req.body;
 
   // Validate input
@@ -91,9 +96,31 @@ const updateUserAccount = async (req, res) => {
   }
 };
 
+const deleteUserAccount = async (req, res) => {
+  const email = req.params.email;
+  const user = req.user;
+
+  if (!email) {
+    return res.status(400).send("Email is required to delete account.");
+  }
+
+  if (email !== user.email) {
+    return res.status(401).send("Unauthorized");
+  }
+
+  try {
+    await userAccountService.deleteUserAccount(email);
+    res.status(200).send("User account deleted successfully");
+  } catch (error) {
+    console.error("Error in deleting user account: ", error);
+    res.status(500).send(`Failed to delete user account: ${error.message}`);
+  }
+};
+
 module.exports = {
   addUserAccount,
   signInUser,
   signOutUser,
   updateUserAccount,
+  deleteUserAccount,
 };

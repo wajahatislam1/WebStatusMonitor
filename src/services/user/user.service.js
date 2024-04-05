@@ -23,6 +23,24 @@ const getUserAccount = async (email) => {
   return userAccounts.find((user) => user.email === email);
 };
 
+const deleteUserAccount = async (email) => {
+  //Removing the user's account
+  let userAccounts = await readJsonFile(userAccountsFile);
+  let updatedUsers = userAccounts.filter((user) => user.email !== email);
+
+  // Ensure the directory exists, then write the data to file
+  await fs.mkdir(path.dirname(userAccountsFile), { recursive: true });
+  await fs.writeFile(userAccountsFile, JSON.stringify(updatedUsers));
+
+  //Removing the user's tokens
+  let allTokens = await readJsonFile(tokensFilePath);
+  let updatedTokens = allTokens.filter((tokenData) => tokenData.email !== email);
+
+  // Ensure the directory exists, then write the data to file
+  await fs.mkdir(path.dirname(tokensFilePath), { recursive: true });
+  await fs.writeFile(tokensFilePath, JSON.stringify(updatedTokens));
+};
+
 // This function is used to get the token from the stored against the email
 const hasToken = async (email, token) => {
   try {
@@ -86,4 +104,5 @@ module.exports = {
   hasToken,
   addToken,
   removeToken,
+  deleteUserAccount,
 };

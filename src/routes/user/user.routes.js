@@ -26,10 +26,16 @@ router.get(
   userAccountController.signOutUser
 );
 
-router.post(
-  "/update",
+router.put(
+  "/:email",
   [passport.authenticate("jwt", { session: false }), userValidator.updatePasswordValidator],
   userAccountController.updateUserAccount
+);
+
+router.delete(
+  "/:email",
+  passport.authenticate("jwt", { session: false }),
+  userAccountController.deleteUserAccount
 );
 
 router.get("/tokenValid", passport.authenticate("jwt", { session: false }), (req, res) => {
