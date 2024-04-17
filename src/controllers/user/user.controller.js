@@ -2,22 +2,24 @@ const userAccountService = require("../../services/user/user.service");
 const passwordUtils = require("../../utils/password.utils");
 const crypto = require("crypto");
 const jwt = require("jsonwebtoken");
-const { validationResult } = require("express-validator");
 const { JWT_SECRET_KEY } = require("../../configs/env.config");
+const uuid = require("uuid");
+
+const { validationResult } = require("express-validator");
 
 const addUserAccount = async (req, res) => {
-  //validating the request body
+  // Check for validation errors
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     return res.status(400).json({ errors: errors.array() });
   }
 
   const salt = crypto.randomBytes(16);
-  // Hashing the password
   const hashedPassword = await passwordUtils.hashPassword(req.body.password, salt);
 
   // creating the account info object
-  accountInfo = {
+  userAccount = {
+    id: uuid.v4(),
     email: req.body.email,
     password: hashedPassword,
     salt: salt.toString("hex"),
@@ -26,7 +28,7 @@ const addUserAccount = async (req, res) => {
 
   // Calling the service to add the user account
   try {
-    await userAccountService.addUserAccount(accountInfo);
+    await userAccountService.addUserAccount(userAccount);
     res.status(201).send("User account created successfully");
   } catch (error) {
     res.status(400).send(error.message);
@@ -38,7 +40,7 @@ const signInUser = async (req, res) => {
   const token = jwt.sign({ user }, JWT_SECRET_KEY, { expiresIn: "1h" });
 
   try {
-    await userAccountService.addToken(user.email, token);
+    await userAccountService.addToken(user.id, token);
     res.status(200).send({ token });
   } catch (erorr) {
     console.error("Error in storing token: ", error);
@@ -51,7 +53,7 @@ const signOutUser = async (req, res) => {
   const token = req.headers.authorization.split(" ")[1];
 
   try {
-    await userAccountService.removeToken(user.email, token);
+    await userAccountService.removeToken(user.id, token);
     res.status(200).send("User signed out successfully");
   } catch (error) {
     console.error("Error in signing out user: ", error);
@@ -60,27 +62,33 @@ const signOutUser = async (req, res) => {
 };
 
 const updateUserAccount = async (req, res) => {
-  //validating the request body
+  //Check for validation errors
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
     return res.status(400).json({ errors: errors.array() });
   }
 
-  const email = req.params.email;
-  const user = req.user;
-  if (email !== user.email) {
-    return res.status(401).send("Unauthorized");
-  }
-
   let accountInfo = req.body;
+  const user = req.user;
 
-  // Validate input
+  // Check if no fields are provided to update
   if (!accountInfo.name && !accountInfo.password) {
     return res.status(400).send("No fields to update");
   }
 
   // Check if password is provided
   if (accountInfo.password) {
+    //verify if previous password is provided
+    if (
+      !(await passwordUtils.doPasswordsMatch(
+        user.password,
+        accountInfo.previousPassword,
+        user.salt
+      ))
+    ) {
+      return res.status(400).send("Invalid previous password");
+    }
+
     const salt = crypto.randomBytes(16);
     const hashedPassword = await passwordUtils.hashPassword(accountInfo.password, salt);
     accountInfo.password = hashedPassword;
@@ -88,7 +96,7 @@ const updateUserAccount = async (req, res) => {
   }
 
   try {
-    await userAccountService.updateUserAccount(user.email, accountInfo);
+    await userAccountService.updateUserAccount(user.id, accountInfo);
     res.status(200).send("User account updated successfully");
   } catch (error) {
     console.error("Error in updating user account: ", error);
@@ -97,19 +105,10 @@ const updateUserAccount = async (req, res) => {
 };
 
 const deleteUserAccount = async (req, res) => {
-  const email = req.params.email;
   const user = req.user;
 
-  if (!email) {
-    return res.status(400).send("Email is required to delete account.");
-  }
-
-  if (email !== user.email) {
-    return res.status(401).send("Unauthorized");
-  }
-
   try {
-    await userAccountService.deleteUserAccount(email);
+    await userAccountService.deleteUserAccount(user.id);
     res.status(200).send("User account deleted successfully");
   } catch (error) {
     console.error("Error in deleting user account: ", error);

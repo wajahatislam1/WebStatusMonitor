@@ -1,11 +1,14 @@
 const passport = require("passport");
 const LocalStrategy = require("passport-local").Strategy;
 const GoogleStrategy = require("passport-google-oidc");
+const JWTStrategy = require("passport-jwt").Strategy;
+const ExtractJWT = require("passport-jwt").ExtractJwt;
+const crypto = require("crypto");
+const uuid = require("uuid");
+const createError = require("http-errors");
 
 const userAccountService = require("../services/user/user.service");
 const passwordUtils = require("../utils/password.utils");
-const crypto = require("crypto");
-
 const envConfig = require("./env.config");
 
 //Local strategy to authenticate the user signing in
@@ -16,32 +19,24 @@ passport.use(
       passwordField: "password",
     },
     async (email, password, done) => {
-      const user = await userAccountService.getUserAccount(email);
+      const user = await userAccountService.getUserByEmail(email);
       if (!user) {
-        return done(null, false, { message: "Invalid email" });
+        return done(createError(401, "Invalid email"));
       }
 
-      if (user.source !== "local") {
-        return done(null, false, { message: "User can't sign in using password." });
+      if (!user.password) {
+        return done(createError(401, "User doesn't have a password. Sign in with other methods."));
       }
 
-      const storedPassword = Buffer.from(user.password, "hex");
-      const hashedPassword = Buffer.from(
-        await passwordUtils.hashPassword(password, Buffer.from(user.salt, "hex")),
-        "hex"
-      );
-
-      if (!crypto.timingSafeEqual(storedPassword, hashedPassword)) {
-        return done(null, false, { message: "Invalid password" });
+      if (await passwordUtils.doPasswordsMatch(user.password, password, user.salt)) {
+        return done(null, user);
       }
-      return done(null, user);
+      return done(createError(401, "Invalid password"));
     }
   )
 );
 
 //JWT strategy to authenticate the user
-const JWTStrategy = require("passport-jwt").Strategy;
-const ExtractJWT = require("passport-jwt").ExtractJwt;
 
 passport.use(
   new JWTStrategy(
@@ -52,12 +47,12 @@ passport.use(
     },
     async (req, jwtPayload, done) => {
       const requestToken = req.headers.authorization.split(" ")[1];
-      const isTokenStored = await userAccountService.hasToken(jwtPayload.user.email, requestToken);
+      const isTokenStored = await userAccountService.hasToken(jwtPayload.user.id, requestToken);
 
       if (jwtPayload.exp > Date.now() / 1000 && isTokenStored) {
         return done(null, jwtPayload.user);
       } else {
-        return done(null, false);
+        return done(createError(401, "Unauthorized"));
       }
     }
   )
@@ -73,16 +68,24 @@ passport.use(
       scope: ["email", "profile"],
     },
     async (accessToken, profile, done) => {
-      user = {
-        email: profile.emails[0].value,
-        source: "google",
-      };
-      existingUser = await userAccountService.getUserAccount(user.email);
-      if (!existingUser) {
-        await userAccountService.addUserAccount(user);
-      }
+      const userEmail = profile.emails[0].value;
+      try {
+        existingUser = await userAccountService.getUserByEmail(userEmail);
+        if (existingUser) {
+          return done(null, existingUser);
+        }
+        user = {
+          id: uuid.v4(),
+          email: userEmail,
+          source: "google",
+        };
 
-      return done(null, user);
+        await userAccountService.addUserAccount(user);
+        return done(null, user);
+      } catch (error) {
+        console.error("Error in google strategy: ", error);
+        return done(createError(500, "Internal server error"));
+      }
     }
   )
 );

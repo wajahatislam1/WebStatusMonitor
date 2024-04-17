@@ -4,11 +4,12 @@ const passport = require("passport");
 const userAccountController = require("../../controllers/user/user.controller");
 const userValidator = require("../../validators/user/user.validator");
 
-router.post("/signup", userValidator.signupValidators, userAccountController.addUserAccount);
+router.post("/signup", userValidator.authValidator, userAccountController.addUserAccount);
 
 router.post(
   "/signin/local",
   passport.authenticate("local", { session: false }),
+  userValidator.authValidator,
   userAccountController.signInUser
 );
 
@@ -27,13 +28,12 @@ router.get(
 );
 
 router.put(
-  "/:email",
-  [passport.authenticate("jwt", { session: false }), userValidator.updatePasswordValidator],
+  "/",
+  [passport.authenticate("jwt", { session: false }), userValidator.updateUserValidator],
   userAccountController.updateUserAccount
 );
-
 router.delete(
-  "/:email",
+  "/",
   passport.authenticate("jwt", { session: false }),
   userAccountController.deleteUserAccount
 );
