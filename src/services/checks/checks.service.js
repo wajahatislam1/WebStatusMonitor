@@ -51,6 +51,11 @@ const getUsersChecks = async (userId) => {
   const checks = await readJsonFile(checksFilePath);
   return checks.filter((c) => c.userId === userId);
 };
+
+const getChecksForUrl = async (urlId) => {
+  const checks = await readJsonFile(checksFilePath);
+  return checks.filter((c) => c.urlId === urlId);
+};
 module.exports = {
   addCheck,
   getCheck,
@@ -59,4 +64,5 @@ module.exports = {
   userHasUrl,
   isCheckOwner,
   getUsersChecks,
+  getChecksForUrl,
 };

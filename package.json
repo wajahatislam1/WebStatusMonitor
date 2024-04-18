@@ -16,6 +16,8 @@
     "http-errors": "~1.6.3",
     "joi": "^17.12.3",
     "jsonwebtoken": "^9.0.2",
+    "node-cron": "^3.0.3",
+    "nodemailer": "^6.9.13",
     "passport": "^0.7.0",
     "passport-google-oidc": "^0.1.0",
     "passport-jwt": "^4.0.1",

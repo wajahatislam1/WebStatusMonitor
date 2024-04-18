@@ -98,8 +98,19 @@ const getUsersChecks = async (req, res) => {
   const user = req.user;
 
   try {
-    const checks = await checkService.getUsersChecks(user.id);
-    res.status(200).json(checks);
+    let userChecks = await checkService.getUsersChecks(user.id);
+    userChecks = await Promise.all(
+      userChecks.map(async (check) => {
+        const url = await urlService.getUrl(check.urlId);
+        return {
+          id: check.id,
+          url: url.url,
+          status: url.status,
+        };
+      })
+    );
+
+    res.status(200).json(userChecks);
   } catch (error) {
     console.error("Error in getting users checks: ", error);
     res.status(500).send(`Failed to get users checks: ${error.message}`);

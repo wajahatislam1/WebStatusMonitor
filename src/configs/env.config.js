@@ -9,6 +9,8 @@ const envSchema = joi
     GOOGLE_CLIENT_SECRET: joi.string().required(),
     GOOGLE_CALLBACK_URL: joi.string().required(),
     SESSION_SECRET: joi.string().required(),
+    GOOGLE_EMAIL: joi.string().required(),
+    GOOGLE_PASSWORD: joi.string().required(),
   })
   .unknown();
 
@@ -24,4 +26,6 @@ module.exports = {
   GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET,
   GOOGLE_CALLBACK_URL: process.env.GOOGLE_CALLBACK_URL,
   SESSION_SECRET: process.env.SESSION_SECRET,
+  GOOGLE_EMAIL: process.env.GOOGLE_EMAIL,
+  GOOGLE_PASSWORD: process.env.GOOGLE_PASSWORD,
 };

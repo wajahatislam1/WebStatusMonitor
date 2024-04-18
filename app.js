@@ -8,6 +8,8 @@ const passport = require("./src/configs/passport.config");
 const session = require("express-session");
 const FileStore = require("session-file-store")(session);
 
+const cronJobs = require("./src/cronJobs/index");
+
 const { PORT } = require("./src/configs/env.config");
 
 //Load routes
