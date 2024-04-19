@@ -1,12 +1,19 @@
+// Load environment variables from .env file
+require("dotenv").config();
+
 const express = require("express");
 const bodyParser = require("body-parser");
 const app = express();
+const passport = require("./src/configs/passport.config");
+const session = require("express-session");
+const FileStore = require("session-file-store")(session);
 
-// Load environment variables from .env file
-require("dotenv").config();
-const port = process.env.PORT || 3000;
+const cronJobs = require("./src/cronJobs/index");
+
+const { PORT } = require("./src/configs/env.config");
 
 //Load routes
+const routes = require("./src/routes/index");
 
 app.use(bodyParser.json());
 app.use(
@@ -15,7 +22,19 @@ app.use(
   })
 );
 
-// Attach routes to the app
+// Session middleware
+app.use(
+  session({
+    store: new FileStore({ path: "./data/sessions" }),
+    secret: process.env.SESSION_SECRET,
+    resave: false,
+    saveUninitialized: true,
+    cookie: { secure: false },
+  })
+);
+
+// Attaching routes to the app
+app.use("/api/v1/", routes);
 
 /* Error handler middleware */
 app.use((err, req, res, next) => {
@@ -26,6 +45,9 @@ app.use((err, req, res, next) => {
   return;
 });
 
-app.listen(port, "0.0.0.0", () => {
-  console.log(`Example app listening at http://localhost:${port}`);
+// Initialize passport
+app.use(passport.initialize());
+
+app.listen(PORT, "0.0.0.0", () => {
+  console.log(`Example app listening at http://localhost:${PORT}`);
 });
