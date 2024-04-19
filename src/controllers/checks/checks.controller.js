@@ -68,7 +68,7 @@ const updateCheck = async (req, res) => {
   }
 
   try {
-    check = await checkService.getCheck(checkId);
+    let check = await checkService.getCheck(checkId);
     check = {
       ...check,
       userId: user.id,

@@ -15,7 +15,7 @@ const notifySubscribedUsers = async (urlObj) => {
   });
 };
 const checkAllUrlsStatus = () => {
-  cron.schedule("*/10 * * * * *", async () => {
+  cron.schedule("*/2 * * * *", async () => {
     const allUrls = await urlsService.getAllUrls();
     console.log("Running cron job.");
 
