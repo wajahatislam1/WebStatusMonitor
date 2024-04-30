@@ -21,7 +21,7 @@ passport.use(
     async (email, password, done) => {
       const user = await userAccountService.getUserByEmail(email);
       if (!user) {
-        return done(createError(401, "Invalid email"));
+        return done(createError(401, "User not found. Please sign up."));
       }
 
       if (!user.password) {
@@ -31,7 +31,7 @@ passport.use(
       if (await passwordUtils.doPasswordsMatch(user.password, password, user.salt)) {
         return done(null, user);
       }
-      return done(createError(401, "Invalid password"));
+      return done(createError(401, "Incorrect email or password. Please try again."));
     }
   )
 );

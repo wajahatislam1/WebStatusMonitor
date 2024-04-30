@@ -18,7 +18,7 @@ router.get("/signin/google", passport.authenticate("google", { session: false })
 router.get(
   "/signin/google/callback",
   passport.authenticate("google", { session: false }),
-  userAccountController.signInUser
+  userAccountController.googleSignIn
 );
 
 router.get(

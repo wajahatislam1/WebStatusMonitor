@@ -7,11 +7,13 @@ const uuid = require("uuid");
 
 const { validationResult } = require("express-validator");
 
+const GOOGLE_AUTH_CLIENT_REDIRECT_URL = "http://localhost:5173/users/auth/google";
+
 const addUserAccount = async (req, res) => {
   // Check for validation errors
   const errors = validationResult(req);
   if (!errors.isEmpty()) {
-    return res.status(400).json({ errors: errors.array() });
+    return res.status(400).json({ message: errors.array()[0].msg, errors: errors.array() });
   }
 
   const salt = crypto.randomBytes(16);
@@ -29,22 +31,43 @@ const addUserAccount = async (req, res) => {
   // Calling the service to add the user account
   try {
     await userAccountService.addUserAccount(userAccount);
-    res.status(201).send("User account created successfully");
+    res.status(201).json({ message: "User account created successfully" });
   } catch (error) {
-    res.status(400).send(error.message);
+    // Send a JSON response
+    res.status(400).json({ errors: [{ msg: error.message }] });
   }
 };
 
 const signInUser = async (req, res) => {
+  // Check for validation errors
+  const errors = validationResult(req);
+  if (!errors.isEmpty()) {
+    return res.status(400).json({ message: errors.array()[0].msg, errors: errors.array() });
+  }
+
   const user = req.user;
   const token = jwt.sign({ user }, JWT_SECRET_KEY, { expiresIn: "1h" });
 
   try {
     await userAccountService.addToken(user.id, token);
-    res.status(200).send({ token });
+    res.status(200).json({ token });
   } catch (erorr) {
     console.error("Error in storing token: ", error);
-    res.status(500).send("Internal server error");
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+const googleSignIn = async (req, res) => {
+  const user = req.user;
+  const token = jwt.sign({ user }, JWT_SECRET_KEY, { expiresIn: "1h" });
+
+  try {
+    await userAccountService.addToken(user.id, token);
+    //Redirect  user
+    res.redirect(`${GOOGLE_AUTH_CLIENT_REDIRECT_URL}?token=${token}`);
+  } catch (erorr) {
+    console.error("Error in storing token: ", error);
+    res.status(500).json({ message: "Internal server error" });
   }
 };
 
@@ -54,10 +77,10 @@ const signOutUser = async (req, res) => {
 
   try {
     await userAccountService.removeToken(user.id, token);
-    res.status(200).send("User signed out successfully");
+    res.status(200).json({ message: "User signed out successfully" });
   } catch (error) {
     console.error("Error in signing out user: ", error);
-    res.status(500).send("Internal server error");
+    res.status(500).json({ message: "Internal server error" });
   }
 };
 
@@ -73,7 +96,7 @@ const updateUserAccount = async (req, res) => {
 
   // Check if no fields are provided to update
   if (!accountInfo.name && !accountInfo.password) {
-    return res.status(400).send("No fields to update");
+    return res.status(400).json({ message: "No fields provided to update" });
   }
 
   // Check if password is provided
@@ -86,7 +109,7 @@ const updateUserAccount = async (req, res) => {
         user.salt
       ))
     ) {
-      return res.status(400).send("Invalid previous password");
+      return res.status(400).json({ message: "Previous password is incorrect" });
     }
 
     const salt = crypto.randomBytes(16);
@@ -97,10 +120,10 @@ const updateUserAccount = async (req, res) => {
 
   try {
     await userAccountService.updateUserAccount(user.id, accountInfo);
-    res.status(200).send("User account updated successfully");
+    res.status(200).json({ message: "User account updated successfully" });
   } catch (error) {
     console.error("Error in updating user account: ", error);
-    res.status(500).send(`Failed to update user account: ${error.message}`);
+    res.status(500).json({ message: "Internal server error " });
   }
 };
 
@@ -112,7 +135,7 @@ const deleteUserAccount = async (req, res) => {
     res.status(200).send("User account deleted successfully");
   } catch (error) {
     console.error("Error in deleting user account: ", error);
-    res.status(500).send(`Failed to delete user account: ${error.message}`);
+    res.status(500).json({ message: `Failed to delete user account: ${error.message}` });
   }
 };
 
@@ -122,4 +145,5 @@ module.exports = {
   signOutUser,
   updateUserAccount,
   deleteUserAccount,
+  googleSignIn,
 };

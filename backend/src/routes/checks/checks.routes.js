@@ -14,7 +14,6 @@ router.post(
   checkController.addCheck
 );
 
-
 router.get(
   "/all",
   passport.authenticate("jwt", { session: false }),

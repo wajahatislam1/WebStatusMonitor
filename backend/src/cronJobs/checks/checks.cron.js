@@ -10,8 +10,10 @@ const notifySubscribedUsers = async (urlObj) => {
   checks.forEach(async (check) => {
     const user = await userService.getUserById(check.userId);
     const message = `The status of url "${urlObj.url}" that you have been tracking is Now ${urlObj.status}`;
-
-    await emailService.sendEmail(user.email, "Url Status Update", message);
+    // Send email only to  a single user to avoid spam in development
+    if (user.email === "wajahat407ali@gmail.com") {
+      await emailService.sendEmail(user.email, "Url Status Update", message);
+    }
   });
 };
 const checkAllUrlsStatus = () => {

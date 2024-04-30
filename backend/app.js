@@ -11,6 +11,7 @@ const FileStore = require("session-file-store")(session);
 const cronJobs = require("./src/cronJobs/index");
 
 const { PORT } = require("./src/configs/env.config");
+const cors = require("cors");
 
 //Load routes
 const routes = require("./src/routes/index");
@@ -21,6 +22,8 @@ app.use(
     extended: true,
   })
 );
+app.use(cors());
+app.options("*", cors());
 
 // Session middleware
 app.use(
